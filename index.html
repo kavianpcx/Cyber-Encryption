@@ -1,0 +1,793 @@
+
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Cyber Encryption (Offline Pro)</title>
+    <style>
+      :root {
+        --primary: #6c5dff;
+        --primary-2: #8f82ff;
+        --accent: #4e43ff;
+
+        --bg: #030307;
+        --bg-2: #07070f;
+        --surface: rgba(255, 255, 255, 0.035);
+        --surface-2: rgba(255, 255, 255, 0.05);
+
+        --border: rgba(255, 255, 255, 0.1);
+        --border-strong: rgba(143, 130, 255, 0.45);
+
+        --text: #f5f5ff;
+        --muted: #a9add8;
+
+        --ok: #19c37d;
+        --danger: #ff5c7a;
+
+        --radius-xl: 22px;
+        --radius-lg: 16px;
+        --radius-md: 12px;
+
+        --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.45);
+        --shadow-neon:
+          0 0 0 1px rgba(108, 93, 255, 0.25),
+          0 10px 30px rgba(108, 93, 255, 0.18);
+        --tr: 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+      }
+
+      /* Pink mode (تم دوم) */
+      body.pink {
+        --primary: #ff4fa2;
+        --primary-2: #ff7fbe;
+        --accent: #ff5fa9;
+
+        --bg: #140b12;
+        --bg-2: #1b0f18;
+        --surface: rgba(255, 255, 255, 0.06);
+        --surface-2: rgba(255, 255, 255, 0.085);
+
+        --border: rgba(255, 255, 255, 0.14);
+        --border-strong: rgba(255, 127, 190, 0.62);
+
+        --text: #ffffff;
+        --muted: #f0c6dd;
+
+        --shadow-soft: 0 16px 45px rgba(0, 0, 0, 0.5);
+        --shadow-neon:
+          0 0 0 1px rgba(255, 127, 190, 0.35),
+          0 10px 36px rgba(255, 95, 169, 0.28);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+        background:
+          radial-gradient(
+            1200px 800px at 10% -10%,
+            rgba(108, 93, 255, 0.18),
+            transparent 55%
+          ),
+          radial-gradient(
+            900px 600px at 100% 0%,
+            rgba(78, 67, 255, 0.14),
+            transparent 55%
+          ),
+          linear-gradient(160deg, var(--bg), var(--bg-2));
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 28px 16px;
+        transition:
+          background 0.35s ease,
+          color 0.25s ease;
+      }
+
+      .app {
+        width: 100%;
+        max-width: 920px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.04),
+          rgba(255, 255, 255, 0.02)
+        );
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow: var(--shadow-soft);
+        overflow: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.02);
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
+
+      .brand-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-2), var(--primary));
+        box-shadow: 0 0 18px rgba(108, 93, 255, 0.75);
+      }
+
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
+      }
+
+      .badge {
+        font-size: 12px;
+        color: #d9d6ff;
+        border: 1px solid rgba(143, 130, 255, 0.35);
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(108, 93, 255, 0.12);
+        white-space: nowrap;
+      }
+
+      .toggle {
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 7px 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all var(--tr);
+      }
+      .toggle:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .content {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+        padding: 16px;
+      }
+
+      @media (min-width: 920px) {
+        .content {
+          grid-template-columns: 1fr 1fr;
+        }
+        .full {
+          grid-column: 1/-1;
+        }
+      }
+
+      .card {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        background: var(--surface);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        padding: 14px;
+        transition: all 0.25s ease;
+      }
+
+      .card h3 {
+        margin: 0 0 10px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.9px;
+      }
+
+      .keyBox {
+        width: 100%;
+        min-height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px dashed rgba(143, 130, 255, 0.35);
+        background: rgba(108, 93, 255, 0.08);
+        color: #d8d3ff;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 13px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        user-select: none;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 170px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: var(--surface-2);
+        color: var(--text);
+        padding: 12px 13px;
+        resize: vertical;
+        outline: none;
+        font-size: 14px;
+        line-height: 1.55;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        transition:
+          border-color var(--tr),
+          box-shadow var(--tr),
+          background var(--tr);
+      }
+
+      textarea:focus {
+        border-color: var(--border-strong);
+        box-shadow: var(--shadow-neon);
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        appearance: none;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-weight: 650;
+        color: white;
+        cursor: pointer;
+        transition:
+          transform var(--tr),
+          filter var(--tr),
+          box-shadow var(--tr),
+          opacity var(--tr),
+          background var(--tr);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .btn svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        flex: none;
+      }
+
+      .btn:active {
+        transform: translateY(1px) scale(0.99);
+      }
+      .btn:hover {
+        filter: brightness(1.06);
+      }
+      .btn[disabled] {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--primary-2), var(--primary));
+        box-shadow: 0 6px 20px rgba(108, 93, 255, 0.35);
+      }
+
+      .btn-ghost {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--border);
+        color: #ecebff;
+      }
+
+      .btn-wide {
+        flex: 1;
+        min-width: 140px;
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .actions .btn {
+        width: 100%;
+        padding: 13px;
+        min-height: 44px;
+      }
+
+      .spinner {
+        width: 15px;
+        height: 15px;
+        border: 2px solid rgba(255, 255, 255, 0.35);
+        border-top-color: #fff;
+        border-radius: 50%;
+        display: none;
+        animation: spin 0.8s linear infinite;
+      }
+
+      .btn.loading .spinner {
+        display: inline-block;
+      }
+      .btn.loading .label {
+        opacity: 0.9;
+      }
+      .btn.loading svg {
+        display: none;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .footer {
+        padding: 10px 16px 16px;
+        color: var(--muted);
+        font-size: 12px;
+        text-align: center;
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 20px;
+        transform: translateX(-50%) translateY(8px);
+        opacity: 0;
+        pointer-events: none;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        color: #fff;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-size: 13px;
+        box-shadow: 0 10px 26px rgba(78, 67, 255, 0.4);
+        transition: all 0.28s ease;
+        z-index: 999;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="topbar">
+        <div class="brand">
+          <span class="brand-dot"></span>
+          <span>Cyber Encryption</span>
+        </div>
+
+        <div class="topbar-right">
+          <span class="badge">AES-256-GCM</span>
+          <button
+            id="themeToggle"
+            class="toggle"
+            type="button"
+            title="Toggle Dark/Pink"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 1 0 9.8 9.8z" />
+            </svg>
+            <span id="themeLabel">Dark</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="content">
+        <section class="card full">
+          <h3>Key Management</h3>
+          <div id="keyBox" class="keyBox">No key generated</div>
+          <div class="row" style="margin-top: 10px">
+            <button class="btn btn-primary btn-wide" onclick="generateKey()">
+              <svg viewBox="0 0 24 24">
+                <circle cx="7.5" cy="15.5" r="3.5" />
+                <path d="M11 13l9-9M17 4h3v3M14 7l3 3" />
+              </svg>
+              <span class="label">Generate Key</span>
+            </button>
+            <button class="btn btn-ghost btn-wide" onclick="copyKey()">
+              <svg viewBox="0 0 24 24">
+                <rect x="9" y="9" width="11" height="11" rx="2" />
+                <rect x="4" y="4" width="11" height="11" rx="2" />
+              </svg>
+              <span class="label">Copy Key</span>
+            </button>
+            <button class="btn btn-ghost btn-wide" onclick="importKey()">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 3v12" />
+                <path d="M7 10l5 5 5-5" />
+                <path d="M4 21h16" />
+              </svg>
+              <span class="label">Import Key</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h3>Input</h3>
+          <textarea
+            id="inputText"
+            placeholder="Type or paste plain/cipher text..."
+            autocapitalize="off"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+          ></textarea>
+          <div class="row" style="margin-top: 10px">
+            <button class="btn btn-ghost btn-wide" onclick="clearInput()">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M16 3l5 5-9.5 9.5a2 2 0 0 1-1.4.6H5a2 2 0 0 1-2-2v-5.1a2 2 0 0 1 .6-1.4L13 0z"
+                />
+                <path d="M7 17h14" />
+              </svg>
+              <span class="label">Clear Input</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h3>Output</h3>
+          <textarea
+            id="outputText"
+            readonly
+            placeholder="Result will appear here..."
+            autocapitalize="off"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+          ></textarea>
+          <div class="row" style="margin-top: 10px">
+            <button class="btn btn-ghost btn-wide" onclick="copyOutput()">
+              <svg viewBox="0 0 24 24">
+                <rect x="9" y="9" width="11" height="11" rx="2" />
+                <rect x="4" y="4" width="11" height="11" rx="2" />
+              </svg>
+              <span class="label">Copy Output</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="card full">
+          <h3>Actions</h3>
+          <div class="actions">
+            <button
+              id="encryptBtn"
+              class="btn btn-primary"
+              onclick="encryptText()"
+            >
+              <svg viewBox="0 0 24 24">
+                <rect x="5" y="11" width="14" height="10" rx="2" />
+                <path d="M8 11V8a4 4 0 1 1 8 0v3" />
+              </svg>
+              <span class="spinner"></span>
+              <span class="label">Encrypt</span>
+            </button>
+            <button
+              id="decryptBtn"
+              class="btn btn-primary"
+              onclick="decryptText()"
+            >
+              <svg viewBox="0 0 24 24">
+                <rect x="5" y="11" width="14" height="10" rx="2" />
+                <path d="M8 11V8a4 4 0 0 1 7-2" />
+              </svg>
+              <span class="spinner"></span>
+              <span class="label">Decrypt</span>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <div class="footer">Generated by Kavian SH</div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        const keyBox = document.getElementById("keyBox");
+        const inputText = document.getElementById("inputText");
+        const outputText = document.getElementById("outputText");
+        const encryptBtn = document.getElementById("encryptBtn");
+        const decryptBtn = document.getElementById("decryptBtn");
+        const themeToggle = document.getElementById("themeToggle");
+        const themeLabel = document.getElementById("themeLabel");
+
+        let cryptoKey;
+
+        /* ====================== TOAST ====================== */
+        function showToast(msg) {
+          const t = document.getElementById("toast");
+          t.textContent = msg;
+          t.classList.add("show");
+          setTimeout(() => t.classList.remove("show"), 1800);
+        }
+        window.showToast = showToast;
+
+        /* ====================== THEME (Dark/Pink) ====================== */
+        function updateThemeLabel() {
+          const isPink = document.body.classList.contains("pink");
+          themeLabel.textContent = isPink ? "Pink" : "Dark";
+        }
+
+        function applyTheme(theme) {
+          document.body.classList.remove("pink");
+          if (theme === "pink") document.body.classList.add("pink");
+          updateThemeLabel();
+        }
+
+        const savedTheme = localStorage.getItem("ce_theme") || "dark";
+        applyTheme(savedTheme);
+
+        themeToggle.addEventListener("click", () => {
+          const next = document.body.classList.contains("pink")
+            ? "dark"
+            : "pink";
+          applyTheme(next);
+          localStorage.setItem("ce_theme", next);
+        });
+
+        /* ====================== LOADING STATE ====================== */
+        function setLoading(btn, state, loadingText) {
+          const label = btn.querySelector(".label");
+          if (state) {
+            btn.classList.add("loading");
+            btn.disabled = true;
+            btn.dataset.oldText = label.textContent;
+            label.textContent = loadingText;
+            if (btn === encryptBtn) decryptBtn.disabled = true;
+            if (btn === decryptBtn) encryptBtn.disabled = true;
+          } else {
+            btn.classList.remove("loading");
+            btn.disabled = false;
+            label.textContent = btn.dataset.oldText || label.textContent;
+            encryptBtn.disabled = false;
+            decryptBtn.disabled = false;
+          }
+        }
+
+        /* ====================== HEX HELPERS ====================== */
+        function cleanHex(str) {
+          return str
+            .replace(/[^0-9a-fA-F:]/g, "")
+            .toLowerCase()
+            .trim();
+        }
+
+        function bufToHex(buf) {
+          return [...new Uint8Array(buf)]
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+        }
+
+        function hexToBuf(hex) {
+          hex = hex.replace(/[^0-9a-f]/gi, "");
+          if (hex.length % 2 !== 0) throw new Error("Invalid hex length");
+          const arr = new Uint8Array(hex.length / 2);
+          for (let i = 0; i < arr.length; i++) {
+            arr[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+          }
+          return arr;
+        }
+
+        /* ====================== KEY VIEW ====================== */
+        function shortKey(hex, head = 8, tail = 8) {
+          if (!hex || hex === "No key generated") return hex;
+          if (hex.length <= head + tail + 3) return hex;
+          return `${hex.slice(0, head)}...${hex.slice(-tail)}`;
+        }
+
+        function refreshKeyView() {
+          const full = keyBox.dataset.fullKey || keyBox.textContent;
+          const isMobile = window.matchMedia("(max-width: 600px)").matches;
+          keyBox.textContent = isMobile ? shortKey(full) : full;
+        }
+
+        window.addEventListener("resize", refreshKeyView);
+
+        /* ====================== KEY ====================== */
+        window.generateKey = async function () {
+          try {
+            cryptoKey = await crypto.subtle.generateKey(
+              { name: "AES-GCM", length: 256 },
+              true,
+              ["encrypt", "decrypt"],
+            );
+            const raw = new Uint8Array(
+              await crypto.subtle.exportKey("raw", cryptoKey),
+            );
+            const full = bufToHex(raw);
+            keyBox.dataset.fullKey = full;
+            refreshKeyView();
+            showToast("Key generated!");
+          } catch {
+            showToast("Key generation failed");
+          }
+        };
+
+        function copyFallback(text) {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          const ok = document.execCommand("copy");
+          ta.remove();
+          return ok;
+        }
+
+        window.copyKey = async function () {
+          const full = keyBox.dataset.fullKey || keyBox.textContent;
+          if (!full || full === "No key generated")
+            return showToast("No key to copy");
+          try {
+            await navigator.clipboard.writeText(full);
+            showToast("Key copied!");
+          } catch {
+            copyFallback(full)
+              ? showToast("Key copied!")
+              : showToast("Clipboard blocked");
+          }
+        };
+
+        window.copyOutput = async function () {
+          const text = outputText.value;
+          if (!text) return showToast("No output to copy");
+          try {
+            await navigator.clipboard.writeText(text);
+            showToast("Output copied!");
+          } catch {
+            copyFallback(text)
+              ? showToast("Output copied!")
+              : showToast("Clipboard blocked");
+          }
+        };
+
+        window.importKey = async function () {
+          try {
+            const clip = (await navigator.clipboard.readText()).trim();
+            if (/^[0-9a-fA-F]+$/.test(clip)) {
+              return importRawKey(clip);
+            }
+          } catch {}
+
+          const popup = prompt("Paste your key here:");
+          if (!popup) return;
+
+          const text = popup.trim();
+          if (!/^[0-9a-fA-F]+$/.test(text))
+            return showToast("Invalid key format");
+          importRawKey(text);
+        };
+
+        async function importRawKey(hex) {
+          try {
+            const raw = hexToBuf(hex);
+            if (raw.length !== 32)
+              return showToast("Key must be 64 hex chars (256-bit)");
+
+            cryptoKey = await crypto.subtle.importKey(
+              "raw",
+              raw,
+              { name: "AES-GCM" },
+              true,
+              ["encrypt", "decrypt"],
+            );
+
+            keyBox.dataset.fullKey = hex.toLowerCase();
+            refreshKeyView();
+            showToast("Key imported");
+          } catch {
+            showToast("Invalid key");
+          }
+        }
+
+        /* ====================== INPUT CLEAR ====================== */
+        window.clearInput = function () {
+          if (!inputText.value) return showToast("Input is already empty");
+          inputText.value = "";
+          inputText.focus();
+          showToast("Input cleared");
+        };
+
+        /* ====================== ENCRYPT / DECRYPT ====================== */
+        window.encryptText = async function () {
+          if (!cryptoKey) return showToast("Generate or import key first");
+
+          setLoading(encryptBtn, true, "Encrypting...");
+          try {
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const data = new TextEncoder().encode(inputText.value);
+
+            const encrypted = await crypto.subtle.encrypt(
+              { name: "AES-GCM", iv },
+              cryptoKey,
+              data,
+            );
+
+            outputText.value = bufToHex(iv) + ":" + bufToHex(encrypted);
+            showToast("Encrypted");
+          } catch {
+            showToast("Encryption failed");
+          } finally {
+            setLoading(encryptBtn, false);
+          }
+        };
+
+        window.decryptText = async function () {
+          if (!cryptoKey) return showToast("Generate or import key first");
+
+          const raw = cleanHex(inputText.value);
+          if (!raw.includes(":")) return showToast("Invalid format");
+
+          const [ivHex, encHex] = raw.split(":");
+          if (!ivHex || !encHex) return showToast("Invalid format");
+
+          setLoading(decryptBtn, true, "Decrypting...");
+          try {
+            const iv = hexToBuf(ivHex);
+            const enc = hexToBuf(encHex);
+
+            if (iv.length !== 12) return showToast("Invalid IV length");
+
+            const decrypted = await crypto.subtle.decrypt(
+              { name: "AES-GCM", iv },
+              cryptoKey,
+              enc,
+            );
+
+            outputText.value = new TextDecoder().decode(decrypted);
+            showToast("Decrypted");
+          } catch {
+            showToast("Wrong key or corrupted data");
+          } finally {
+            setLoading(decryptBtn, false);
+          }
+        };
+
+        // initial render
+        refreshKeyView();
+      });
+    </script>
+  </body>
+</html>
