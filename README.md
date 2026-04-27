@@ -38,5 +38,4 @@ The app uses the **Web Crypto API (AES‑GCM)** to ensure strong client‑side e
 - Safari  
 
 ## License
-MIT License © 2026 Kavian Sherkatfar
-
+This project is licensed under the MIT License – see the [LICENSE](./LICENSE) file for details.
