@@ -5,6 +5,13 @@ import format from "./format.cjs";
 const { isEncryptedText } = format;
 
 window.addEventListener("DOMContentLoaded", () => {
+  function toast(message) {
+    const node = document.getElementById("toast");
+    if (!node) return;
+    node.textContent = message;
+    node.classList.add("show");
+    setTimeout(() => node.classList.remove("show"), 1800);
+  }
   const output = document.getElementById("outputText");
   const input = document.getElementById("inputText");
   const row = output?.nextElementSibling;
@@ -55,10 +62,10 @@ window.addEventListener("DOMContentLoaded", () => {
   reuseButton.className = "btn btn-ghost btn-wide";
   reuseButton.textContent = "Use output as input";
   reuseButton.addEventListener("click", () => {
-    if (!output.value) return window.showToast?.("No output to use");
+    if (!output.value) return toast("No output to use");
     input.value = output.value;
     input.focus();
-    window.showToast?.("Output moved into input");
+    toast("Output moved into input");
   });
   row.appendChild(reuseButton);
 
@@ -100,7 +107,7 @@ window.addEventListener("DOMContentLoaded", () => {
   qrButton.addEventListener("click", async () => {
     const value = output.value.trim();
     if (!isEncryptedText(value)) {
-      window.showToast?.("QR needs encrypted hex text (max 1800 chars)");
+      toast("QR needs encrypted hex text (max 1800 chars)");
       return;
     }
     qrButton.disabled = true;
@@ -116,7 +123,7 @@ window.addEventListener("DOMContentLoaded", () => {
       overlay.hidden = false;
       close.focus();
     } catch {
-      window.showToast?.("Ciphertext too long for a QR code");
+      toast("Ciphertext too long for a QR code");
     } finally {
       qrButton.disabled = false;
     }
