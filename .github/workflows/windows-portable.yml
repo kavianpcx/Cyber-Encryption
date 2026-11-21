@@ -1,0 +1,75 @@
+name: Windows portable
+
+on:
+  pull_request:
+    paths:
+      - 'desktop/**'
+      - 'package.json'
+      - '.github/workflows/windows-portable.yml'
+      - 'README.md'
+  push:
+    branches: [main]
+    paths:
+      - 'desktop/**'
+      - 'package.json'
+      - '.github/workflows/windows-portable.yml'
+      - 'README.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Unit tests
+        run: npm test
+      - name: Build offline QR preload
+        run: npm run bundle
+      - name: Electron integration test
+        run: npm run smoke
+      - name: Screenshot of real running desktop app
+        run: npm run screenshot
+      - name: Build Windows portable EXE
+        run: npm run build:portable
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-portable
+          path: |
+            dist/*.exe
+            desktop/screenshot.png
+          if-no-files-found: error
+
+  release:
+    needs: windows
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-portable
+          path: release-files
+      - name: Publish v1.1.0 release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: v1.1.0
+          RELEASE_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f release-files/Cyber-Encryption-1.1.0-Windows-Portable.exe
+          test -f release-files/screenshot.png
+          mv release-files/screenshot.png release-files/Cyber-Encryption-desktop.png
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Release $RELEASE_TAG already exists; leaving it unchanged."
+            exit 0
+          fi
+          gh release create "$RELEASE_TAG"             release-files/Cyber-Encryption-1.1.0-Windows-Portable.exe             release-files/Cyber-Encryption-desktop.png             --target "$RELEASE_SHA"             --title "Cyber Encryption v1.1.0 • Windows Portable"             --notes "Offline Windows x64 portable EXE; no installer. Original index.html is unchanged. Includes ciphertext-only QR export, desktop Save As, and sandboxed Chromium. Screenshot attached. IMPORTANT: unsigned build; Windows SmartScreen may warn. Not independently audited. Source and MIT license remain in the repository."

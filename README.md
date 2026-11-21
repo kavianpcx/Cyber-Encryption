@@ -1,54 +1,71 @@
 # Cyber Encryption (Offline Pro)
 
-A secure **offline encryption & decryption web app** for text and files, built with pure **HTML, CSS, and JavaScript**.  
-The app uses the **Web Crypto API (AES‑GCM)** to ensure strong client‑side encryption.
+An **open-source, offline** encryption and decryption app for text and files, built with HTML/CSS/JavaScript and the Web Crypto API.
+
+**Two ways to use it:**
+- **Original browser app:** open [`index.html`](./index.html) in a modern browser. The original web app is preserved unchanged.
+- **Windows portable app (v1.1.0):** download a self-contained Windows x64 EXE from [GitHub Releases](https://github.com/kavianpcx/Cyber-Encryption/releases/tag/v1.1.0). No installer and no internet needed to run it.
+
+## Desktop screenshot
+
+![Real Cyber Encryption desktop screenshot](https://github.com/kavianpcx/Cyber-Encryption/releases/download/v1.1.0/Cyber-Encryption-desktop.png)
+
+*Captured automatically from the running Electron app during the Windows release build. The image becomes available when the release finishes.*
 
 ## Features
-- Fully **offline** – works without any server
-- Encrypt & decrypt **text**
-- Encrypt & decrypt **files**
-- Choose between **Default Key** or **Passphrase**
-- Built-in Web Crypto API (AES-GCM)
-- Clean, responsive UI
 
-## How to Use
-1. Open the `index.html` file in any modern browser.
-2. Enter your text or choose a file.
-3. Select key mode:
-   - Default Key  
-   - Passphrase
-4. Click **Encrypt** or **Decrypt**.
-5. Download or copy the result.
+| Feature | Original HTML | Windows portable |
+| --- | :---: | :---: |
+| Offline text encryption and decryption | ✅ | ✅ |
+| Offline file encryption and decryption | ✅ | ✅ |
+| AES-256-GCM, random IV, authentication tag | ✅ | ✅ |
+| Generated/imported 256-bit key | ✅ | ✅ |
+| Passphrase mode (PBKDF2 / SHA-256) | ✅ | ✅ |
+| Dark/pink theme, drag and drop | ✅ | ✅ |
+| Encrypted-text QR display and PNG export | — | ✅ |
+| Move output to input in one click | — | ✅ |
+| Dedicated native file-saving experience | Browser | ✅ |
+| Self-contained Windows executable | — | ✅ |
 
-## HTTPS Required for Online Use
+**QR privacy:** The portable QR feature only accepts ciphertext-shaped hex output (max 1,800 characters). It never QR-encodes a raw key or an ordinary plaintext message. A recipient must still possess the matching key or passphrase. QR generation runs locally without an API or CDN.
 
-If you upload this project to a website, the site **must use HTTPS (SSL)**.
+## Quick start
 
-Modern browsers block the Web Crypto API (AES‑GCM) on unsecured HTTP pages.  
-This means encryption and decryption will only work on:
+### Browser (original version)
+1. Download the project and open `index.html`.
+2. Enter text or select a file.
+3. Choose **Default Key** (generate/import key) or **Passphrase**.
+4. Encrypt or decrypt. Copy text results, or download the result for files.
 
-- `https://` websites  
-- Local files (`file://`)
+### Windows portable
+1. Download `Cyber-Encryption-1.1.0-Windows-Portable.exe` from [Releases](https://github.com/kavianpcx/Cyber-Encryption/releases/tag/v1.1.0).
+2. Put it in a writable folder, optionally on a USB drive, and run it. No installation is necessary.
+3. The app uses the same encryption formats as the HTML version. Use **Show encrypted QR** for short encrypted text, or **Use output as input** to reverse a workflow.
 
-Using plain `http://` will prevent the crypto functions from running.
+The unsigned EXE may trigger a Windows SmartScreen warning. Verify the release source before running; no code-signing or third-party audit is claimed.
 
-## Technology Stack
-- HTML5
-- CSS3
-- JavaScript
-- Web Crypto API (AES-GCM)
+## Compatibility and encryption formats
 
-## Security Notes
-- Everything happens locally on your device.
-- No data is uploaded anywhere.
-- If you lose your passphrase, the encrypted data **cannot** be recovered.
+The desktop app **loads the original `index.html` without editing it**. Files encrypted by either app can be decrypted by the other (when the same key mode and key/passphrase are used).
 
-## Browser Support
-- Chrome  
-- Edge  
-- Firefox  
-- Safari  
+- Cipher: AES-256-GCM, 96-bit random IV and a 128-bit authentication tag.
+- Passphrases: PBKDF2 with SHA-256, 200,000 iterations and a random 16-byte salt.
+- Text (raw key): `iv_hex:ciphertext_and_tag_hex`
+- Text (passphrase): `salt_hex:iv_hex:ciphertext_and_tag_hex`
+- Files: `CE1` magic bytes + one-byte mode + (optional salt) + IV + ciphertext/tag. Encrypted files use `.enc`.
 
+**Important:** The generated raw key is not backed up for you. Keep it separately and securely; losing it or forgetting the passphrase makes the corresponding ciphertext unrecoverable. Decrypted files and clipboard contents are plaintext. File processing is in memory and limited by device resources.
+
+## Privacy and offline behavior
+
+All encryption and QR creation happen on the device. The browser version uses no remote scripts. The desktop version bundles Chromium, disables Node integration, sandboxing escape routes and popup/navigation to external pages, and blocks outgoing HTTP/HTTPS/WebSocket/FTP requests. There is no login, cloud sync, auto-update or telemetry.
+
+The portable desktop app saves Chromium's local preferences/cache in a `CyberEncryptionData/` folder beside the EXE (not in your normal AppData folder); remove this folder to reset settings. Keys and input text are held in memory by the original app rather than intentionally persisted in the profile. Avoid untrusted machines, insecure clipboards, and sharing your key. This is **not an independent security audit**.
+
+## Development and releases
+
+The standalone HTML file needs no build step. For the desktop app, see [desktop build instructions](./desktop/README.md). GitHub Actions builds and tests the Windows EXE, takes a real screenshot, and publishes the release from the main branch. Dependencies are downloaded **at build time**, not at runtime. The complete source is available in this repository.
 
 ## License
-This project is licensed under the MIT License – see the [LICENSE](./LICENSE) file for details.
+
+MIT © 2026 Kavian Sherkatfar. See [LICENSE](./LICENSE).

@@ -1,0 +1,46 @@
+{
+  "name": "cyber-encryption-portable",
+  "version": "1.1.0",
+  "description": "Offline encryption desktop wrapper for the original Cyber Encryption web app",
+  "private": true,
+  "license": "MIT",
+  "main": "desktop/main.cjs",
+  "scripts": {
+    "bundle": "esbuild desktop/preload.js --bundle --platform=browser --format=iife --target=chrome120 --minify --outfile=desktop/preload.bundle.js",
+    "start": "npm run bundle && electron .",
+    "test": "node --test desktop/format.test.cjs",
+    "smoke": "node desktop/smoke.cjs",
+    "screenshot": "node desktop/screenshot.cjs",
+    "build:portable": "npm run bundle && electron-builder --win portable --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "45.4.1",
+    "electron-builder": "26.18.0",
+    "esbuild": "^0.25.0",
+    "playwright-core": "^1.56.1",
+    "qrcode": "1.5.4"
+  },
+  "build": {
+    "appId": "com.kaviansh.cyberencryption",
+    "productName": "Cyber Encryption",
+    "copyright": "Copyright © 2026 Kavian Sherkatfar",
+    "asar": true,
+    "files": [
+      "index.html",
+      "LICENSE",
+      "desktop/main.cjs",
+      "desktop/preload.bundle.js"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [{ "target": "portable", "arch": ["x64"] }],
+      "artifactName": "Cyber-Encryption-${version}-Windows-Portable.${ext}",
+      "signAndEditExecutable": false
+    },
+    "portable": {
+      "artifactName": "Cyber-Encryption-${version}-Windows-Portable.${ext}"
+    }
+  }
+}
