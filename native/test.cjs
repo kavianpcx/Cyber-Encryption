@@ -2,7 +2,7 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { spawn } = require("node:child_process");
+const { spawn, execFileSync } = require("node:child_process");
 const { chromium } = require("playwright-core");
 const exe = path.join(__dirname, "dist", "Cyber-Encryption-1.2.1-Windows-Portable.exe");
 if (!fs.existsSync(exe)) throw Error("Native EXE not found");
@@ -28,6 +28,10 @@ const sleep = n => new Promise(r => setTimeout(r, n));
     await sleep(250);
   }
   if (!page) throw Error("Native window did not load embedded offline HTML");
+  console.log(execFileSync("pwsh", [
+    "-NoProfile", "-NonInteractive", "-File",
+    path.join(__dirname, "verify-window.ps1"), String(child.pid)
+  ], { encoding: "utf8", timeout: 20000 }).trim());
   assert.equal(await page.evaluate(() => window.isSecureContext && !!crypto.subtle), true);
 
   assert.equal(await page.locator("#ce-about-button").innerText(), "v1.2.1");
