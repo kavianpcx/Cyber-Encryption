@@ -81,3 +81,153 @@ textarea{resize:vertical;min-height:150px!important;max-height:34vh;
 @media(max-width:600px){.content{grid-template-columns:1fr!important}
   .topbar{padding-left:8px!important}
   .brand{font-size:12px!important}.ce-window-controls button{width:31px}}
+
+
+/* v1.2.1: unified native chrome and two fully themed desktop palettes.
+   The legacy "pink" body class is retained only for index.html compatibility. */
+:root {
+  --ce-window: #0d0b25;
+  --ce-window-end: #171431;
+  --ce-header: rgba(39,30,82,.94);
+  --ce-surface: rgba(255,255,255,.045);
+  --ce-line: rgba(174,157,251,.25);
+  --ce-copy: rgba(158,142,248,.13);
+  --ce-accent: #7c67f5;
+  --ce-accent-end: #513ac9;
+  --ce-dash: rgba(179,156,255,.5);
+  --ce-muted: #bcb7df;
+  --ce-text: #f7f5ff;
+  --ce-thumb: #5d548d;
+  --ce-focus: #ad98ff;
+}
+body.pink {
+  /* Keep the old class/localStorage value; use green palette in native UI. */
+  --primary: #20c783;
+  --primary-2: #56e8a3;
+  --accent: #28ba76;
+  --bg: #071610;
+  --bg-2: #0b2319;
+  --surface: rgba(134,255,185,.035);
+  --surface-2: rgba(134,255,185,.055);
+  --border: rgba(127,233,169,.22);
+  --border-strong: rgba(73,226,141,.52);
+  --text: #effff6;
+  --muted: #b6dfc9;
+  --shadow-neon: 0 0 0 1px rgba(52,205,120,.25),0 8px 25px rgba(10,136,75,.14);
+  --ce-window: #061811;
+  --ce-window-end: #0c2c20;
+  --ce-header: rgba(12,47,31,.95);
+  --ce-surface: rgba(140,255,191,.045);
+  --ce-line: rgba(109,220,150,.28);
+  --ce-copy: rgba(82,225,142,.12);
+  --ce-accent: #21bd78;
+  --ce-accent-end: #08794c;
+  --ce-dash: rgba(99,230,147,.54);
+  --ce-muted: #b3dcc7;
+  --ce-text: #f0fff6;
+  --ce-thumb: #367d58;
+  --ce-focus: #62e4a2;
+}
+body { color:var(--ce-text)!important; background:var(--ce-window)!important; }
+.app {
+  background:linear-gradient(155deg,var(--ce-window),var(--ce-window-end))!important;
+  color:var(--ce-text)!important;
+}
+.topbar {
+  background:var(--ce-header)!important;
+  border-bottom:1px solid var(--ce-line)!important;
+  padding:0 10px 0 17px!important;
+  flex:0 0 54px!important;min-height:54px!important;
+}
+.topbar .brand { gap:8px!important;font-size:14px!important; }
+.topbar .ce-brand-mark {
+  border-color:var(--ce-line)!important;
+  background:var(--ce-copy)!important;
+  color:var(--ce-focus)!important;padding:5px!important;
+}
+.topbar .ce-brand-mark svg {width:20px!important;height:20px!important}
+.topbar .ce-window-controls button{width:35px;height:35px}
+.topbar .ce-offline{border-color:rgba(57,198,126,.48);color:#a8f1c4}
+.topbar .toggle{padding:6px 9px!important;min-height:31px!important}
+.topbar .toggle:hover{background:var(--ce-copy)!important}
+.content{max-width:1040px!important;padding:12px 14px 18px!important;gap:10px!important;
+  scrollbar-color:var(--ce-thumb) transparent!important}
+.content::-webkit-scrollbar-thumb{background:var(--ce-thumb)!important}
+.card{
+  background:var(--ce-surface)!important;
+  border:1px solid var(--ce-line)!important;
+  padding:12px!important;border-radius:13px!important;
+}
+.card h3{color:var(--ce-muted)!important;margin-bottom:9px!important}
+.card.passphrase-active{border-color:var(--ce-focus)!important}
+textarea{
+  min-height:128px!important;max-height:33vh!important;padding:10px 11px!important;
+  background:var(--ce-surface)!important;
+  border:1px solid var(--ce-line)!important;
+  color:var(--ce-text)!important;resize:vertical!important
+}
+textarea:focus{border-color:var(--ce-focus)!important;box-shadow:0 0 0 2px var(--ce-copy)!important}
+.keyBox,.fileInfo{
+  min-height:44px!important;background:var(--ce-copy)!important;
+  color:var(--ce-text)!important;border:1px dashed var(--ce-dash)!important
+}
+.select-btn,.pass-input{
+  color:var(--ce-text)!important;border-color:var(--ce-line)!important
+}
+.select-menu,body.pink .select-menu{background:var(--ce-window-end)!important}
+.select-item.active{background:var(--ce-copy)!important;border-color:var(--ce-line)!important}
+.btn{min-height:36px!important;border-radius:9px!important}
+.btn-primary{
+  color:#fff!important;
+  background:linear-gradient(110deg,var(--ce-accent),var(--ce-accent-end))!important;
+  border:1px solid var(--ce-focus)!important;
+  box-shadow:0 2px 12px var(--ce-copy)!important
+}
+.btn-primary .label{color:#fff!important}
+.btn-ghost,.ce-icon-button{
+  background:var(--ce-copy)!important;border-color:var(--ce-line)!important;
+  color:var(--ce-text)!important
+}
+.ce-icon-button:focus-visible,.ce-window-controls button:focus-visible{
+  outline-color:var(--ce-focus)!important
+}
+.ce-qr-dialog,.ce-about-dialog{
+  background:var(--ce-window-end)!important;
+  border:1px solid var(--ce-line)!important;color:var(--ce-text)!important
+}
+.ce-qr-dialog p,.ce-about-dialog p{color:var(--ce-muted)!important}
+.ce-qr-actions a,.ce-about-actions button{
+  background:var(--ce-accent-end)!important;border-color:var(--ce-focus)!important
+}
+.ce-qr-actions button{background:var(--ce-copy)!important;border-color:var(--ce-line)!important}
+.ce-about-button{
+  background:var(--ce-copy);color:var(--ce-muted);border:1px solid var(--ce-line);
+  border-radius:7px;font:600 10px system-ui;padding:6px 8px;cursor:pointer;white-space:nowrap
+}
+.ce-about-button:hover{color:var(--ce-text);border-color:var(--ce-focus)}
+.ce-about-overlay{
+  position:fixed;inset:0;z-index:2100;display:grid;place-items:center;
+  background:#05060cd9;backdrop-filter:blur(5px);padding:20px
+}
+.ce-about-overlay[hidden]{display:none}
+.ce-about-dialog{
+  width:min(390px,100%);padding:22px;border-radius:17px;
+  box-shadow:0 18px 60px #0008;color:var(--ce-text);text-align:left
+}
+.ce-about-dialog h2{margin:0 0 8px;font-size:19px}
+.ce-about-dialog p{font-size:13px;line-height:1.6;margin:8px 0}
+.ce-about-dialog .ce-about-meta{font:600 12px ui-monospace,Consolas,monospace}
+.ce-about-actions{display:flex;justify-content:flex-end;margin-top:17px}
+.ce-about-actions button{color:#fff;padding:9px 18px;border:1px solid;
+  border-radius:9px;cursor:pointer;font-weight:650}
+.ce-input-actions{display:flex!important;gap:8px!important}
+.ce-input-actions>.ce-icon-button{flex:1!important;min-width:0!important;width:auto!important}
+.ce-text-info{margin:7px 0 0;color:var(--ce-muted);font:11px ui-monospace,Consolas,monospace}
+.ce-green #themeLabel{color:var(--ce-focus)}
+@media(max-width:950px) {
+  .topbar-right .badge{display:none!important}
+}
+@media(max-width:870px) {
+  .ce-offline{display:none!important}
+  .topbar{padding-left:9px!important}
+}
