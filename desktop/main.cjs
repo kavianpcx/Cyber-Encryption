@@ -3,6 +3,7 @@ const { app, BrowserWindow, session } = require("electron");
 const fs = require("node:fs");
 const path = require("node:path");
 
+app.commandLine.appendSwitch("disable-background-networking");
 const entry = path.resolve(__dirname, "..", "index.html");
 
 // Keep Chromium's profile beside the portable executable, not in AppData.
@@ -22,6 +23,7 @@ if (process.env.PORTABLE_EXECUTABLE_DIR) {
 app.setAppUserModelId("com.kaviansh.cyberencryption");
 app.whenReady().then(() => {
   const profile = session.defaultSession;
+  profile.setSpellCheckerEnabled(false);
 
   // Offline by design: deny ALL outbound HTTP(S), WebSocket and FTP traffic.
   profile.webRequest.onBeforeRequest(
