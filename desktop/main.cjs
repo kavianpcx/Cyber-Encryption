@@ -32,13 +32,14 @@ app.whenReady().then(() => {
   );
 
   const trustedPage = require("node:url").pathToFileURL(entry).href;
-  const allowClipboardRead = (contents, permission) =>
-    permission === "clipboard-read" && contents?.getURL() === trustedPage;
+  const allowClipboard = (contents, permission) =>
+    ["clipboard-read", "clipboard-write", "clipboard-sanitized-write"].includes(permission) &&
+    contents?.getURL() === trustedPage;
   profile.setPermissionRequestHandler((contents, permission, callback) => {
-    callback(allowClipboardRead(contents, permission));
+    callback(allowClipboard(contents, permission));
   });
   profile.setPermissionCheckHandler((contents, permission) => {
-    return allowClipboardRead(contents, permission);
+    return allowClipboard(contents, permission);
   });
 
   // Let the OS show a native Save As dialog for Blob: download links.
