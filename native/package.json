@@ -1,0 +1,15 @@
+{
+  "name": "cyber-encryption-native-build",
+  "private": true,
+  "version": "1.2.0",
+  "description": "Build-only tooling for a native, single EXE WebView2 host",
+  "scripts": {
+    "bundle": "esbuild frontend.js --bundle --platform=browser --target=chrome120 --minify --outfile=frontend.bundle.js",
+    "test": "node test.cjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "playwright-core": "1.56.1",
+    "qrcode": "1.5.4"
+  }
+}

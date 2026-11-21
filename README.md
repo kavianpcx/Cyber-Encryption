@@ -1,5 +1,19 @@
 # Cyber Encryption (Offline Pro)
 
+## Lightweight Windows Portable (v1.2.0)
+
+**New:** A native Windows x64 application in a **single small EXE**, without Electron or a bundled Chromium engine. It uses the WebView2 Runtime provided by Windows 11. No installation or internet connection is required to use the app. On Windows 10, WebView2 may need to be installed separately once.
+
+[**Download lightweight Windows EXE (v1.2.0)**](https://github.com/kavianpcx/Cyber-Encryption/releases/tag/v1.2.0) · [Build instructions](./native/README.md)
+
+![Real screenshot of the lightweight native desktop application](https://github.com/kavianpcx/Cyber-Encryption/releases/download/v1.2.0/Cyber-Encryption-Native-v1.2.0.png)
+
+The new app has its own window, icon, minimize/maximize/close controls, icon-only utility buttons, an improved scrollbar, and local encrypted-text QR output. The original `index.html` is **unchanged**, and files encrypted with the original app remain compatible. The Windows profile directory `CyberEncryptionData` is created next to the EXE.
+
+The previous [Electron v1.1.0 release](https://github.com/kavianpcx/Cyber-Encryption/releases/tag/v1.1.0) is still available as a legacy fallback, but is much larger.
+
+---
+
 An **open-source, offline** encryption and decryption app for text and files, built with HTML/CSS/JavaScript and the Web Crypto API.
 
 **Two ways to use it:**

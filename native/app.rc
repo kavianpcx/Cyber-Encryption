@@ -1,0 +1,4 @@
+1 ICON "app.ico"
+101 RCDATA "..\\index.html"
+102 RCDATA "frontend.bundle.js"
+103 RCDATA "ui.css"
