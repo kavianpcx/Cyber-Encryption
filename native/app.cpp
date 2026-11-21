@@ -57,7 +57,7 @@ static void ResizeWebView() {
 static LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wp, LPARAM lp) {
     switch (message) {
     case WM_NCCALCSIZE:
-        if (wp) return 0; // Native borderless chrome; preserve Windows resize behavior below.
+        if (wp) return 0; // Eliminate system titlebar; HTML provides the only window controls.
         break;
     case WM_NCHITTEST: {
         if (IsZoomed(hwnd)) return HTCLIENT;
@@ -86,8 +86,8 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wp, LPARAM lp
             info->ptMaxSize.x = m.rcWork.right - m.rcWork.left;
             info->ptMaxSize.y = m.rcWork.bottom - m.rcWork.top;
         }
-        info->ptMinTrackSize.x = 760;
-        info->ptMinTrackSize.y = 540;
+        info->ptMinTrackSize.x = 820;
+        info->ptMinTrackSize.y = 580;
         return 0;
     }
     case WM_SIZE: ResizeWebView(); return 0;
@@ -295,8 +295,10 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int nCmdShow) {
     wc.hbrBackground = CreateSolidBrush(RGB(13, 12, 32));
     if (!RegisterClassExW(&wc)) { CoUninitialize(); return 1; }
     g_window = CreateWindowExW(WS_EX_APPWINDOW, wc.lpszClassName,
-        L"Cyber Encryption", WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
-        CW_USEDEFAULT, CW_USEDEFAULT, 1160, 850,
+        L"Cyber Encryption",
+        WS_POPUP | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX |
+        WS_MAXIMIZEBOX | WS_CLIPCHILDREN,
+        CW_USEDEFAULT, CW_USEDEFAULT, 960, 700,
         nullptr, nullptr, instance, nullptr);
     if (!g_window) { CoUninitialize(); return 1; }
     const BOOL dark = TRUE;
