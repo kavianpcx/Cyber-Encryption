@@ -111,3 +111,144 @@ window.addEventListener("DOMContentLoaded",()=>{
   finally{qr.disabled=false;}
  });
 });
+
+
+// Native-only utilities. The root index.html stays byte-for-byte unchanged.
+window.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.getElementById("themeToggle");
+  const themeLabel = document.getElementById("themeLabel");
+  const syncTheme = () => {
+    const green = document.body.classList.contains("pink"); // old web-app state key
+    document.body.classList.toggle("ce-green", green);
+    if (themeLabel) themeLabel.textContent = green ? "Green" : "Dark";
+    if (toggle) {
+      toggle.title = green ? "Switch to Dark mode" : "Switch to Green mode";
+      toggle.setAttribute("aria-label", toggle.title);
+    }
+  };
+  // Original index.html owns toggling and persists to ce_theme; this only
+  // maps the existing "pink" state to the native green color palette.
+  syncTheme();
+  toggle?.addEventListener("click", syncTheme);
+
+  const right = document.querySelector(".topbar-right");
+  if (right) {
+    const version = document.createElement("button");
+    version.type = "button";
+    version.className = "ce-about-button";
+    version.id = "ce-about-button";
+    version.textContent = "v1.2.1";
+    version.title = "About Cyber Encryption · current version";
+    version.setAttribute("aria-label", "About Cyber Encryption, current version 1.2.1");
+    right.prepend(version);
+
+    const about = document.createElement("div");
+    about.className = "ce-about-overlay";
+    about.hidden = true;
+    about.innerHTML =
+      '<div class="ce-about-dialog" role="dialog" aria-modal="true" aria-labelledby="ce-about-title">'+
+      '<h2 id="ce-about-title">Cyber Encryption</h2>'+
+      '<p class="ce-about-meta">Version 1.2.1 · Windows Portable x64</p>'+
+      '<p>Offline AES-256-GCM text and file encryption. Original CE1 files remain compatible.</p>'+
+      '<p>Runs locally using the system WebView2 runtime. Free and open source under the MIT license.</p>'+
+      '<p>Keep your encryption keys and passphrases safe. There is no recovery service.</p>'+
+      '<div class="ce-about-actions"><button type="button">Close</button></div></div>';
+    document.body.append(about);
+    const close = about.querySelector("button");
+    const hide = () => { about.hidden = true; version.focus(); };
+    version.addEventListener("click", () => {
+      about.hidden = false;
+      close.focus();
+    });
+    close.addEventListener("click", hide);
+    about.addEventListener("click", event => {
+      if (event.target === about) hide();
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && !about.hidden) {
+        event.stopImmediatePropagation();
+        hide();
+      }
+    }, true);
+  }
+
+  const input = document.getElementById("inputText");
+  const output = document.getElementById("outputText");
+  if (!input || !output) return;
+
+  // Input buttons are explicit actions; no clipboard read occurs without a click.
+  const inputRow = input.nextElementSibling;
+  if (inputRow) {
+    inputRow.classList.add("ce-input-actions");
+    const paste = document.createElement("button");
+    paste.id = "ce-paste";
+    paste.type = "button";
+    paste.className = "btn ce-icon-button";
+    iconize(paste, "import", "Paste clipboard into input");
+    paste.addEventListener("click", async () => {
+      try {
+        const value = await navigator.clipboard.readText();
+        if (!value) return toast("Clipboard is empty");
+        input.value = value;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.focus();
+        toast("Pasted into input");
+      } catch { toast("Clipboard access is unavailable"); }
+    });
+    inputRow.append(paste);
+
+    const clearBoth = document.createElement("button");
+    clearBoth.id = "ce-clear-text";
+    clearBoth.type = "button";
+    clearBoth.className = "btn ce-icon-button";
+    iconize(clearBoth, "erase", "Clear input and output text (not the key)");
+    clearBoth.addEventListener("click", () => {
+      input.value = "";
+      output.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+      toast("Both text fields cleared; key unchanged");
+    });
+    inputRow.append(clearBoth);
+  }
+
+  const outputRow = output.nextElementSibling;
+  if (outputRow) {
+    const save = document.createElement("button");
+    save.id = "ce-export-text";
+    save.type = "button";
+    save.className = "btn ce-icon-button";
+    iconize(save, "import", "Save encrypted text as TXT");
+    save.addEventListener("click", () => {
+      const encrypted = output.value.trim();
+      if (!validCipher(encrypted)) {
+        toast("Only encrypted text can be exported");
+        return;
+      }
+      const blob = new Blob([encrypted + "\n"], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "cyber-encryption-ciphertext.txt";
+      a.style.display = "none";
+      document.body.append(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      toast("Encrypted text ready to save");
+    });
+    outputRow.append(save);
+  }
+
+  // Shortcuts act on explicit input focus. No automatic copying of secrets.
+  document.addEventListener("keydown", event => {
+    if (event.key !== "Enter" || !event.ctrlKey || event.altKey || event.metaKey)
+      return;
+    if (!event.target.closest("textarea, input")) return;
+    event.preventDefault();
+    const button = document.getElementById(event.shiftKey ? "decryptBtn" : "encryptBtn");
+    if (button && !button.disabled) button.click();
+  });
+  document.getElementById("encryptBtn")?.setAttribute("title", "Encrypt · Ctrl+Enter");
+  document.getElementById("decryptBtn")?.setAttribute("title", "Decrypt · Ctrl+Shift+Enter");
+});

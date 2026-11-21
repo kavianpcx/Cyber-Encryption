@@ -2,9 +2,9 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { spawn } = require("node:child_process");
+const { spawn, execFileSync } = require("node:child_process");
 const { chromium } = require("playwright-core");
-const exe = path.join(__dirname, "dist", "Cyber-Encryption-1.2.0-Windows-Portable.exe");
+const exe = path.join(__dirname, "dist", "Cyber-Encryption-1.2.1-Windows-Portable.exe");
 if (!fs.existsSync(exe)) throw Error("Native EXE not found");
 const child = spawn(exe, [], {
   env: { ...process.env, CYBER_UI_TEST: "1" }, stdio: "ignore"
@@ -28,7 +28,38 @@ const sleep = n => new Promise(r => setTimeout(r, n));
     await sleep(250);
   }
   if (!page) throw Error("Native window did not load embedded offline HTML");
+  console.log(execFileSync("pwsh", [
+    "-NoProfile", "-NonInteractive", "-File",
+    path.join(__dirname, "verify-window.ps1"), String(child.pid)
+  ], { encoding: "utf8", timeout: 20000 }).trim());
   assert.equal(await page.evaluate(() => window.isSecureContext && !!crypto.subtle), true);
+
+  assert.equal(await page.locator("#ce-about-button").innerText(), "v1.2.1");
+  assert.equal(await page.locator(".ce-window-controls button").count(), 3);
+  assert.equal(await page.locator(".topbar").count(), 1);
+  await page.locator("#ce-about-button").click();
+  assert.match(await page.locator(".ce-about-dialog").innerText(), /Version 1\.2\.1/);
+  await page.locator(".ce-about-dialog button").click();
+  assert.equal(await page.locator(".ce-about-overlay").isHidden(), true);
+
+  // Theme must visibly change computed colors and survive relaunch/reload.
+  await page.evaluate(() => localStorage.setItem("ce_theme", "dark"));
+  await page.reload();
+  await page.locator("#ce-about-button").waitFor();
+  assert.equal(await page.locator("#themeLabel").innerText(), "Dark");
+  const dark = await page.locator(".app").evaluate(el => getComputedStyle(el).backgroundImage);
+  await page.locator("#themeToggle").click();
+  assert.equal(await page.locator("#themeLabel").innerText(), "Green");
+  assert.equal(await page.evaluate(() => localStorage.getItem("ce_theme")), "pink");
+  const green = await page.locator(".app").evaluate(el => getComputedStyle(el).backgroundImage);
+  assert.notEqual(dark, green, "theme toggle must visually update the app background");
+  await page.reload();
+  await page.locator("#ce-about-button").waitFor();
+  assert.equal(await page.locator("#themeLabel").innerText(), "Green");
+  assert.equal(await page.locator(".app").evaluate(el => getComputedStyle(el).backgroundImage), green);
+  await page.locator("#themeToggle").click();
+  assert.equal(await page.locator("#themeLabel").innerText(), "Dark");
+
   assert.equal(await page.locator("#ce-qr").getAttribute("aria-label"), "Show encrypted text as QR code");
   await page.locator("#inputText").fill("Lightweight native portable AES-GCM");
   await page.getByRole("button", { name: "Generate a new encryption key" }).click();
@@ -47,6 +78,17 @@ const sleep = n => new Promise(r => setTimeout(r, n));
     document.querySelector("#outputText").value === "Lightweight native portable AES-GCM");
   await page.locator("#ce-qr").click();
   assert.equal(await page.locator(".ce-qr-overlay").isHidden(), true);
+
+  // Export is intentionally ciphertext-only, and text clearing never affects keys.
+  assert.equal(await page.locator("#ce-export-text").getAttribute("aria-label"), "Save encrypted text as TXT");
+  await page.locator("#ce-export-text").click();
+  assert.equal(await page.locator("#toast").innerText(), "Only encrypted text can be exported");
+  await page.locator("#ce-clear-text").click();
+  assert.equal(await page.locator("#inputText").inputValue(), "");
+  assert.equal(await page.locator("#outputText").inputValue(), "");
+  assert.equal(await page.locator("#keyBox").getAttribute("data-full-key") !== null, true);
+  assert.equal(await page.locator("#ce-paste").getAttribute("aria-label"), "Paste clipboard into input");
+
   await page.locator("#inputText").fill("Private data stays on this device");
   await page.locator("#encryptBtn").click();
   await page.waitForFunction(() => document.querySelector("#outputText").value.includes(":"));

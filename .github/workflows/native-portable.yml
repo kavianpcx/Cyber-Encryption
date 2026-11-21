@@ -50,7 +50,7 @@ jobs:
         shell: pwsh
         run: |
           msbuild native/CyberEncryption.vcxproj /p:Configuration=Release /p:Platform=x64 /m /verbosity:minimal
-          $exe = Get-Item native/dist/Cyber-Encryption-1.2.0-Windows-Portable.exe
+          $exe = Get-Item native/dist/Cyber-Encryption-1.2.1-Windows-Portable.exe
           Write-Host "Native portable EXE bytes:" $exe.Length
           if ($exe.Length -gt 8388608) { throw "EXE unexpectedly exceeds 8 MiB" }
       - name: Windows integration tests and real screenshot
@@ -72,25 +72,25 @@ jobs:
         with:
           name: native-windows-portable
           path: release-files
-      - name: Publish v1.2.0 native portable release
+      - name: Publish v1.2.1 native portable release
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: v1.2.0
+          RELEASE_TAG: v1.2.1
           RELEASE_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          exe="$(find release-files -type f -name 'Cyber-Encryption-1.2.0-Windows-Portable.exe' -print -quit)"
+          exe="$(find release-files -type f -name 'Cyber-Encryption-1.2.1-Windows-Portable.exe' -print -quit)"
           screenshot="$(find release-files -type f -name 'screenshot.png' -print -quit)"
           test -n "$exe"
           test -n "$screenshot"
-          cp "$screenshot" ./Cyber-Encryption-Native-v1.2.0.png
+          cp "$screenshot" ./Cyber-Encryption-Native-v1.2.1.png
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             echo "Release exists; not replacing published assets."
             exit 0
           fi
-          gh release create "$RELEASE_TAG" "$exe" ./Cyber-Encryption-Native-v1.2.0.png \
+          gh release create "$RELEASE_TAG" "$exe" ./Cyber-Encryption-Native-v1.2.1.png \
             --target "$RELEASE_SHA" \
-            --title "Cyber Encryption v1.2.0 - Lightweight Native Portable" \
+            --title "Cyber Encryption v1.2.1 - Lightweight Native Portable" \
             --notes "Windows x64 native single-EXE, based on system WebView2 (not bundled Electron). App runs completely offline, retains original index.html and CE1 compatibility, custom desktop chrome and icon-only utility controls, local ciphertext QR. Windows 11 normally ships WebView2; on Windows 10 it may need a separate official WebView2 Runtime installation. No code signing or independent security audit."
