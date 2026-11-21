@@ -1,0 +1,96 @@
+name: Lightweight Windows portable
+
+on:
+  pull_request:
+    paths:
+      - 'native/**'
+      - '.github/workflows/native-portable.yml'
+      - 'README.md'
+  push:
+    branches: [main]
+    paths:
+      - 'native/**'
+      - '.github/workflows/native-portable.yml'
+      - 'README.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: microsoft/setup-msbuild@v2
+      - name: Install lightweight build-only dependencies
+        run: npm install --prefix native --no-audit --no-fund
+      - name: Bundle local QR and UI code
+        run: npm run --prefix native bundle
+      - name: Generate app icon
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check pillow
+          python native/generate_icon.py
+      - name: Download official WebView2 C++ SDK (build time only)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force native/deps | Out-Null
+          $url = 'https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/1.0.4314.35'
+          Invoke-WebRequest -Uri $url -OutFile native/webview2-sdk.zip
+          Expand-Archive -LiteralPath native/webview2-sdk.zip -DestinationPath native/deps -Force
+          if (!(Test-Path native/deps/build/native/include/WebView2.h)) { throw "WebView2 SDK header missing" }
+          if (!(Test-Path native/deps/build/native/x64/WebView2LoaderStatic.lib)) { throw "WebView2 static loader missing" }
+      - name: Compile single portable Windows EXE
+        shell: pwsh
+        run: |
+          msbuild native/CyberEncryption.vcxproj /p:Configuration=Release /p:Platform=x64 /m /verbosity:minimal
+          $exe = Get-Item native/dist/Cyber-Encryption-1.2.0-Windows-Portable.exe
+          Write-Host "Native portable EXE bytes:" $exe.Length
+          if ($exe.Length -gt 8388608) { throw "EXE unexpectedly exceeds 8 MiB" }
+      - name: Windows integration tests and real screenshot
+        run: npm run --prefix native test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-windows-portable
+          path: |
+            native/dist/*.exe
+            native/screenshot.png
+          if-no-files-found: error
+
+  release:
+    needs: windows
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: native-windows-portable
+          path: release-files
+      - name: Publish v1.2.0 native portable release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: v1.2.0
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          exe="$(find release-files -type f -name 'Cyber-Encryption-1.2.0-Windows-Portable.exe' -print -quit)"
+          screenshot="$(find release-files -type f -name 'screenshot.png' -print -quit)"
+          test -n "$exe"
+          test -n "$screenshot"
+          cp "$screenshot" ./Cyber-Encryption-Native-v1.2.0.png
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Release exists; not replacing published assets."
+            exit 0
+          fi
+          gh release create "$RELEASE_TAG" "$exe" ./Cyber-Encryption-Native-v1.2.0.png \
+            --target "$RELEASE_SHA" \
+            --title "Cyber Encryption v1.2.0 - Lightweight Native Portable" \
+            --notes "Windows x64 native single-EXE, based on system WebView2 (not bundled Electron). App runs completely offline, retains original index.html and CE1 compatibility, custom desktop chrome and icon-only utility controls, local ciphertext QR. Windows 11 normally ships WebView2; on Windows 10 it may need a separate official WebView2 Runtime installation. No code signing or independent security audit."
