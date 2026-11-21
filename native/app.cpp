@@ -1,6 +1,8 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
+#include <windowsx.h>
+#include <cstring>
 #include <dwmapi.h>
 #include <objidl.h>
 #include <wrl.h>
@@ -150,9 +152,13 @@ static void ConfigureBrowser(HWND hwnd, ICoreWebView2* browser) {
                     std::string html = LoadEmbedded(101);
                     auto at = html.rfind("</body>");
                     if (at != std::string::npos) html.insert(at, "<script src=\"/ui.js\"></script>");
+                    auto head = html.find("</head>");
+                    if (head != std::string::npos) html.insert(head, "<link rel=\"stylesheet\" href=\"/ui.css\">");
                     SendResponse(args, html, L"text/html; charset=utf-8");
                 } else if (uri == base + L"ui.js") {
                     SendResponse(args, LoadEmbedded(102), L"application/javascript; charset=utf-8");
+                } else if (uri == base + L"ui.css") {
+                    SendResponse(args, LoadEmbedded(103), L"text/css; charset=utf-8");
                 } else if (uri.compare(0, 5, L"blob:") == 0 ||
                            uri.compare(0, 5, L"data:") == 0) {
                     // Built-in browser APIs handle local, in-memory exports.
