@@ -19,7 +19,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)dist\</OutDir><IntDir>$(ProjectDir)obj\</IntDir>
-    <TargetName>Cyber-Encryption-1.2.0-Windows-Portable</TargetName>
+    <TargetName>Cyber-Encryption-1.2.1-Windows-Portable</TargetName>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
