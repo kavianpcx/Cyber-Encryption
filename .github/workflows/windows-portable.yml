@@ -65,11 +65,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f release-files/Cyber-Encryption-1.1.0-Windows-Portable.exe
-          test -f release-files/screenshot.png
-          mv release-files/screenshot.png release-files/Cyber-Encryption-desktop.png
+          test -f release-files/dist/Cyber-Encryption-1.1.0-Windows-Portable.exe
+          test -f release-files/desktop/screenshot.png
+          mv release-files/desktop/screenshot.png release-files/Cyber-Encryption-desktop.png
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             echo "Release $RELEASE_TAG already exists; leaving it unchanged."
             exit 0
           fi
-          gh release create "$RELEASE_TAG"             release-files/Cyber-Encryption-1.1.0-Windows-Portable.exe             release-files/Cyber-Encryption-desktop.png             --target "$RELEASE_SHA"             --title "Cyber Encryption v1.1.0 • Windows Portable"             --notes "Offline Windows x64 portable EXE; no installer. Original index.html is unchanged. Includes ciphertext-only QR export, desktop Save As, and sandboxed Chromium. Screenshot attached. IMPORTANT: unsigned build; Windows SmartScreen may warn. Not independently audited. Source and MIT license remain in the repository."
+          gh release create "$RELEASE_TAG"             release-files/dist/Cyber-Encryption-1.1.0-Windows-Portable.exe             release-files/Cyber-Encryption-desktop.png             --target "$RELEASE_SHA"             --title "Cyber Encryption v1.1.0 • Windows Portable"             --notes "Offline Windows x64 portable EXE; no installer. Original index.html is unchanged. Includes ciphertext-only QR export, desktop Save As, and sandboxed Chromium. Screenshot attached. IMPORTANT: unsigned build; Windows SmartScreen may warn. Not independently audited. Source and MIT license remain in the repository."
